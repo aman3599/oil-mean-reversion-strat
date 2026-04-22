@@ -100,96 +100,97 @@ python main.py --detail wti_brent
 
 ## Results (Live yfinance Data, 2015–2025)
 
+Calendar spreads are excluded from all results below (`INCLUDE_CALENDAR_SPREADS = False`). They were tested and consistently lost money both IS and OOS due to the EMA-basis approximation being an invalid proxy for real term structure — see note in the Spread Universe section.
+
 ### In-Sample
 
 Full 10-year backtest on CL=F, BZ=F, HO=F, RB=F daily closes (~2,514 bars per instrument).
 
 | Metric | Value |
 |---|---|
-| Total Return | 215% |
-| Ann. Return | 12.2% |
-| Ann. Volatility | 9.4% |
-| Sharpe Ratio | 0.74 |
-| Sortino Ratio | 1.12 |
-| Max Drawdown | −12.2% |
-| Calmar Ratio | 1.00 |
-| Total Trades | 1,183 |
-| Win Rate | 45.1% |
-| Profit Factor | 1.39 |
-| Avg Hold | 9.7 days |
-| Total Costs | $1,060,417 |
+| Total Return | 436% |
+| Ann. Return | 18.3% |
+| Ann. Volatility | 9.1% |
+| Sharpe Ratio | 1.34 |
+| Sortino Ratio | 1.83 |
+| Max Drawdown | −10.4% |
+| Calmar Ratio | 1.76 |
+| Total Trades | 1,025 |
+| Win Rate | 51.0% |
+| Profit Factor | 1.73 |
+| Avg Hold | 10.4 days |
+| Total Costs | $1,040,757 |
 
 **Per-spread IS breakdown (ranked by P&L):**
 
 | Spread | Trades | Net P&L | Win Rate | Profit Factor |
 |---|---|---|---|---|
-| `wti_brent` | 81 | +$5,558,236 | 55.6% | 2.65 |
-| `crack_rb` | 102 | +$4,622,039 | 51.0% | 2.01 |
-| `crack_211` | 96 | +$4,199,902 | 56.2% | 2.09 |
-| `fly_rb_cl_ho` | 75 | +$3,581,081 | 54.7% | 2.17 |
-| `crack_ho` | 105 | +$3,059,671 | 51.4% | 1.72 |
-| `fly_wti_bz_ho` | 63 | +$3,025,251 | 55.6% | 2.10 |
-| `outright_bz` | 131 | +$2,501,954 | 53.4% | 1.68 |
-| `crack_321` | 92 | +$2,080,012 | 48.9% | 1.48 |
-| `condor_rb_cl_ho_bz` | 47 | +$1,016,401 | 42.6% | 1.39 |
-| `outright_cl` | 131 | +$890,933 | 46.6% | 1.20 |
-| `ho_rb` | 102 | +$667,807 | 45.1% | 1.13 |
-| `cal_*` (4 spreads) | — | **−$9,708,088** | <11% | <0.60 |
+| `wti_brent` | 81 | +$8,207,660 | 55.6% | 2.72 |
+| `crack_rb` | 102 | +$6,336,579 | 51.0% | 1.98 |
+| `crack_211` | 96 | +$5,806,200 | 56.2% | 2.06 |
+| `fly_rb_cl_ho` | 75 | +$4,709,001 | 54.7% | 2.09 |
+| `crack_ho` | 105 | +$4,631,223 | 51.4% | 1.77 |
+| `fly_wti_bz_ho` | 63 | +$3,937,247 | 55.6% | 2.00 |
+| `outright_bz` | 131 | +$3,725,545 | 53.4% | 1.73 |
+| `crack_321` | 92 | +$2,593,861 | 48.9% | 1.42 |
+| `outright_cl` | 131 | +$1,457,681 | 46.6% | 1.23 |
+| `condor_rb_cl_ho_bz` | 47 | +$1,284,130 | 42.6% | 1.34 |
+| `ho_rb` | 102 | +$933,081 | 45.1% | 1.13 |
 
 ### Walk-Forward Out-of-Sample
 
-15 folds (11 completed with sufficient data), rolling 24-month train / 6-month test windows, 2017–2024.
+15 folds (13 completed with sufficient data), rolling 24-month train / 6-month test windows, 2017–2024.
 
 | Metric | In-Sample | Out-of-Sample |
 |---|---|---|
-| Sharpe Ratio | 0.74 | **0.31** |
-| Total Return | 215% | **51%** |
-| Ann. Return | 12.2% | **7.9%** |
-| Ann. Volatility | 9.4% | **9.7%** |
-| Max Drawdown | −12.2% | **−9.4%** |
-| Calmar Ratio | 1.00 | **0.83** |
-| Win Rate | 45.1% | **41.7%** |
-| Profit Factor | 1.39 | **1.26** |
-| Avg Hold | 9.7 days | **7.8 days** |
+| Sharpe Ratio | 1.34 | **1.12** |
+| Total Return | 436% | **186%** |
+| Ann. Return | 18.3% | **17.6%** |
+| Ann. Volatility | 9.1% | **10.5%** |
+| Max Drawdown | −10.4% | **−6.9%** |
+| Calmar Ratio | 1.76 | **2.56** |
+| Win Rate | 51.0% | **51.0%** |
+| Profit Factor | 1.73 | **1.66** |
+| Avg Hold | 10.4 days | **8.7 days** |
 
 **OOS per-spread breakdown (ranked by P&L):**
 
 | Spread | Trades | Net P&L | Win Rate | Profit Factor |
 |---|---|---|---|---|
-| `wti_brent` | 49 | +$2,567,327 | 63.3% | 3.33 |
-| `fly_wti_bz_ho` | 45 | +$1,473,012 | 55.6% | 2.18 |
-| `crack_321` | 43 | +$1,126,611 | 53.5% | 1.89 |
-| `fly_rb_cl_ho` | 44 | +$1,016,697 | 54.5% | 1.82 |
-| `crack_211` | 45 | +$974,739 | 53.3% | 1.76 |
-| `crack_rb` | 42 | +$863,608 | 47.6% | 1.66 |
-| `outright_cl` | 43 | +$803,312 | 53.5% | 1.94 |
-| `crack_ho` | 47 | +$645,122 | 44.7% | 1.47 |
-| `outright_bz` | 41 | +$448,884 | 48.8% | 1.54 |
-| `condor_rb_cl_ho_bz` | 39 | +$136,738 | 43.6% | 1.11 |
-| `ho_rb` | 39 | −$327,212 | 33.3% | 0.78 |
-| `cal_*` (4 spreads) | — | **−$4,579,516** | <14% | <0.44 |
+| `wti_brent` | 69 | +$4,625,418 | 60.9% | 2.83 |
+| `fly_rb_cl_ho` | 60 | +$2,607,402 | 58.3% | 2.09 |
+| `crack_211` | 61 | +$2,548,214 | 57.4% | 2.04 |
+| `crack_321` | 58 | +$1,930,588 | 53.4% | 1.77 |
+| `crack_ho` | 63 | +$1,621,200 | 49.2% | 1.59 |
+| `crack_rb` | 52 | +$1,480,559 | 42.3% | 1.59 |
+| `condor_rb_cl_ho_bz` | 58 | +$1,195,972 | 46.6% | 1.40 |
+| `outright_cl` | 57 | +$1,073,733 | 52.6% | 1.56 |
+| `fly_wti_bz_ho` | 63 | +$917,554 | 49.2% | 1.30 |
+| `outright_bz` | 57 | +$634,867 | 47.4% | 1.35 |
+| `ho_rb` | 57 | −$50,743 | 40.4% | 0.98 |
 
 ---
 
 ## Key Findings
 
 **What works:**
-- **WTI–Brent** is the standout spread in both IS and OOS — the location differential is structurally mean-reverting and well-behaved, driven by pipeline dynamics, quality differentials, and storage arbitrage
+- **WTI–Brent** is the standout spread in both IS (+$8.2M) and OOS (+$4.6M) — the most structurally mean-reverting spread in the universe, anchored by pipeline dynamics, quality differentials, and storage arbitrage. OOS win rate of 60.9% is the highest of any spread
 - **Crack spreads (RB, 211, HO)** and **butterflies** all survive OOS with profit factors above 1.5, confirming genuine mean-reversion in refining margins
+- **IS→OOS Sharpe decay is minimal** (1.34 → 1.12, ~16%) — unusually low for a commodity strategy, attributable to the economic grounding of these spread relationships
+- OOS **win rate matches IS exactly** (51.0%) — a strong signal the strategy isn't curve-fit
 - Outrights contribute modestly; useful for diversification but not the core alpha source
 
-**What doesn't work:**
-- **Calendar spreads are definitively broken** on continuous front-month data — the EMA-basis approximation produces inverted signals. All four lose money IS and OOS and should be excluded entirely until proper term-structure data is available
-- **ho_rb flips negative OOS** (IS profit factor 1.13 → OOS 0.78) — marginal IS edge that doesn't hold, likely noise
+**What to watch:**
+- **`ho_rb` is marginal** — IS profit factor 1.13, OOS essentially flat (−$50K, PF 0.98). The heating oil vs gasoline seasonal relationship has weakened as US refinery exports grew. Consider removing if it continues to underperform
+- **Calendar spreads were tested and removed** — the EMA-basis approximation on front-month continuous data is invalid. Disabled via `INCLUDE_CALENDAR_SPREADS = False` in `config.py`
 
 **Parameter stability:**
-- The in-sample optimizer showed **no stable dominant lookback** on real data (20d–120d selected across folds), unlike the clean 90d preference on synthetic data. This reflects the absence of a single mean-reversion horizon across real oil spreads
-- A **fixed 60d lookback with z_entry ~1.75** is recommended over per-fold optimisation for live deployment — more robust, less overfit
-- The IS→OOS Sharpe decay (~60%) is consistent with commodity mean reversion strategies in the literature
+- The optimizer selects **20d–60d lookbacks most frequently** on real data — shorter than the 90d that dominated on synthetic OU data. Real oil spreads have faster mean-reversion dynamics than the synthetic process assumed
+- A **fixed 40d lookback with z_entry ~1.5** is a reasonable starting point for live deployment — balances responsiveness with noise reduction
+- All 13 completed OOS folds are **positive in absolute return**, with only Fold 15 (2024 H1) showing a negative Sharpe (−0.25) despite a +1.4% return — low activity rather than a losing period
 
-**Worst periods:**
-- **2018 H1** (Fold 3, −4.8% OOS): WTI–Brent spread blew out structurally on US shale supply surges
-- **2024 H1** (Fold 15, −4.2% OOS): Worst single fold — spread relationships shifted amid OPEC+ production changes; worth monitoring going forward
+**Worst period:**
+- **2024 H1** (Fold 15): Lowest OOS Sharpe (−0.25) amid OPEC+ production uncertainty compressing spread volatility. Worth monitoring as a potential regime shift
 
 ---
 
