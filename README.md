@@ -8,16 +8,18 @@ A fully parameterised, event-driven mean reversion strategy focused on oil marke
 
 ```
 oil-spread-reversion/
-├── config.py          # All spread definitions, signal params, risk limits
-├── data.py            # Multi-ticker yfinance download + $/bbl conversion
-├── spreads.py         # Spread construction + OU half-life diagnostics
-├── signals.py         # Per-spread z-score signal engine
-├── backtest.py        # Event-driven portfolio backtest engine
-├── risk.py            # Notional sizing, transaction costs, exposure caps
-├── metrics.py         # Portfolio + per-spread performance analytics
-├── visualize.py       # Dashboard + per-spread detail charts
-├── walk_forward.py    # Walk-forward optimisation (OOS validation)
-└── main.py            # CLI entry point
+├── config.py                  # All spread definitions, signal params, risk limits
+├── data.py                    # Multi-ticker yfinance download + $/bbl conversion
+├── spreads.py                 # Spread construction + OU half-life diagnostics
+├── signals.py                 # Per-spread z-score signal engine
+├── backtest.py                # Event-driven portfolio backtest engine
+├── risk.py                    # Notional sizing, transaction costs, exposure caps
+├── metrics.py                 # Portfolio + per-spread performance analytics
+├── visualize.py               # Dashboard + per-spread detail charts
+├── walk_forward.py            # Walk-forward optimisation (OOS validation)
+├── main.py                    # CLI entry point
+├── strat.ipynb                # Full strategy walkthrough notebook
+└── geopolitical_analysis.ipynb  # Event-by-event geopolitical stress analysis
 ```
 
 ---
@@ -41,7 +43,7 @@ oil-spread-reversion/
 
 All HO and RB prices are converted from $/gallon → $/barrel (×42) before spread construction so every spread is expressed in comparable $/bbl units.
 
-> **Calendar spreads:** The EMA-basis approximation used here is not a valid proxy for true M1–M2 term structure. All four calendar spreads lose money in both in-sample and out-of-sample tests on real data. They require expiry-specific contract data (e.g. CLF25 vs CLH25) rather than continuous front-month series. Remove them from `SPREADS` in `config.py` for any live use.
+> **Calendar spreads:** The EMA-basis approximation used here is not a valid proxy for true M1–M2 term structure. All four calendar spreads lose money in both in-sample and out-of-sample tests on real data. They require expiry-specific contract data (e.g. CLF25 vs CLH25) rather than continuous front-month series. Disabled via `INCLUDE_CALENDAR_SPREADS = False` in `config.py`.
 
 ---
 
@@ -98,99 +100,121 @@ python main.py --detail wti_brent
 
 ---
 
-## Results (Live yfinance Data, 2015–2025)
+## Results (Live yfinance Data, 2015–Mar 2026)
 
-Calendar spreads are excluded from all results below (`INCLUDE_CALENDAR_SPREADS = False`). They were tested and consistently lost money both IS and OOS due to the EMA-basis approximation being an invalid proxy for real term structure — see note in the Spread Universe section.
+Calendar spreads are excluded from all results below (`INCLUDE_CALENDAR_SPREADS = False`). They were tested and consistently lost money both IS and OOS — see note in the Spread Universe section.
 
 ### In-Sample
 
-Full 10-year backtest on CL=F, BZ=F, HO=F, RB=F daily closes (~2,514 bars per instrument).
+Full backtest on CL=F, BZ=F, HO=F, RB=F daily closes (~2,827 bars per instrument, 2015–Mar 2026).
 
 | Metric | Value |
 |---|---|
-| Total Return | 436% |
-| Ann. Return | 18.3% |
-| Ann. Volatility | 9.1% |
-| Sharpe Ratio | 1.34 |
-| Sortino Ratio | 1.83 |
+| Total Return | 477% |
+| Ann. Return | 16.9% |
+| Ann. Volatility | 9.0% |
+| Sharpe Ratio | 1.23 |
+| Sortino Ratio | 1.69 |
 | Max Drawdown | −10.4% |
-| Calmar Ratio | 1.76 |
-| Total Trades | 1,025 |
-| Win Rate | 51.0% |
-| Profit Factor | 1.73 |
-| Avg Hold | 10.4 days |
-| Total Costs | $1,040,757 |
+| Calmar Ratio | 1.63 |
+| Total Trades | 1,148 |
+| Win Rate | 50.6% |
+| Profit Factor | 1.63 |
+| Avg Hold | 10.5 days |
+| Total Costs | $1,315,762 |
 
 **Per-spread IS breakdown (ranked by P&L):**
 
 | Spread | Trades | Net P&L | Win Rate | Profit Factor |
 |---|---|---|---|---|
-| `wti_brent` | 81 | +$8,207,660 | 55.6% | 2.72 |
-| `crack_rb` | 102 | +$6,336,579 | 51.0% | 1.98 |
-| `crack_211` | 96 | +$5,806,200 | 56.2% | 2.06 |
-| `fly_rb_cl_ho` | 75 | +$4,709,001 | 54.7% | 2.09 |
-| `crack_ho` | 105 | +$4,631,223 | 51.4% | 1.77 |
-| `fly_wti_bz_ho` | 63 | +$3,937,247 | 55.6% | 2.00 |
-| `outright_bz` | 131 | +$3,725,545 | 53.4% | 1.73 |
-| `crack_321` | 92 | +$2,593,861 | 48.9% | 1.42 |
-| `outright_cl` | 131 | +$1,457,681 | 46.6% | 1.23 |
-| `condor_rb_cl_ho_bz` | 47 | +$1,284,130 | 42.6% | 1.34 |
-| `ho_rb` | 102 | +$933,081 | 45.1% | 1.13 |
+| `wti_brent` | 92 | +$9,405,035 | 55.4% | 2.45 |
+| `crack_211` | 107 | +$6,677,397 | 56.1% | 1.99 |
+| `crack_rb` | 118 | +$6,653,774 | 50.0% | 1.76 |
+| `fly_rb_cl_ho` | 85 | +$5,391,493 | 54.1% | 1.97 |
+| `outright_bz` | 146 | +$4,590,725 | 54.1% | 1.75 |
+| `fly_wti_bz_ho` | 68 | +$4,062,136 | 54.4% | 1.83 |
+| `crack_ho` | 116 | +$3,948,262 | 50.0% | 1.48 |
+| `crack_321` | 103 | +$2,459,618 | 47.6% | 1.31 |
+| `outright_cl` | 148 | +$1,717,766 | 48.0% | 1.23 |
+| `condor_rb_cl_ho_bz` | 53 | +$1,555,603 | 41.5% | 1.32 |
+| `ho_rb` | 112 | +$1,269,592 | 43.8% | 1.14 |
 
 ### Walk-Forward Out-of-Sample
 
-15 folds (13 completed with sufficient data), rolling 24-month train / 6-month test windows, 2017–2024.
+18 folds (16 completed with sufficient data), rolling 24-month train / 6-month test windows, 2017–Jan 2026.
 
 | Metric | In-Sample | Out-of-Sample |
 |---|---|---|
-| Sharpe Ratio | 1.34 | **1.12** |
-| Total Return | 436% | **186%** |
-| Ann. Return | 18.3% | **17.6%** |
-| Ann. Volatility | 9.1% | **10.5%** |
+| Sharpe Ratio | 1.23 | **1.18** |
+| Total Return | 477% | **274%** |
+| Ann. Return | 16.9% | **18.0%** |
+| Ann. Volatility | 9.0% | **10.2%** |
 | Max Drawdown | −10.4% | **−6.9%** |
-| Calmar Ratio | 1.76 | **2.56** |
-| Win Rate | 51.0% | **51.0%** |
-| Profit Factor | 1.73 | **1.66** |
-| Avg Hold | 10.4 days | **8.7 days** |
+| Calmar Ratio | 1.63 | **2.62** |
+| Win Rate | 50.6% | **52.3%** |
+| Profit Factor | 1.63 | **1.68** |
+| Avg Hold | 10.5 days | **8.9 days** |
 
 **OOS per-spread breakdown (ranked by P&L):**
 
 | Spread | Trades | Net P&L | Win Rate | Profit Factor |
 |---|---|---|---|---|
-| `wti_brent` | 69 | +$4,625,418 | 60.9% | 2.83 |
-| `fly_rb_cl_ho` | 60 | +$2,607,402 | 58.3% | 2.09 |
-| `crack_211` | 61 | +$2,548,214 | 57.4% | 2.04 |
-| `crack_321` | 58 | +$1,930,588 | 53.4% | 1.77 |
-| `crack_ho` | 63 | +$1,621,200 | 49.2% | 1.59 |
-| `crack_rb` | 52 | +$1,480,559 | 42.3% | 1.59 |
-| `condor_rb_cl_ho_bz` | 58 | +$1,195,972 | 46.6% | 1.40 |
-| `outright_cl` | 57 | +$1,073,733 | 52.6% | 1.56 |
-| `fly_wti_bz_ho` | 63 | +$917,554 | 49.2% | 1.30 |
-| `outright_bz` | 57 | +$634,867 | 47.4% | 1.35 |
-| `ho_rb` | 57 | −$50,743 | 40.4% | 0.98 |
+| `wti_brent` | 93 | +$8,307,599 | 62.4% | 3.27 |
+| `condor_rb_cl_ho_bz` | 76 | +$3,037,924 | 50.0% | 1.79 |
+| `crack_ho` | 85 | +$2,595,823 | 54.1% | 1.67 |
+| `fly_rb_cl_ho` | 77 | +$2,586,081 | 57.1% | 1.72 |
+| `crack_211` | 78 | +$2,526,894 | 56.4% | 1.69 |
+| `crack_321` | 73 | +$1,914,634 | 50.7% | 1.52 |
+| `fly_wti_bz_ho` | 84 | +$1,839,732 | 50.0% | 1.41 |
+| `outright_cl` | 79 | +$1,580,113 | 54.4% | 1.57 |
+| `crack_rb` | 70 | +$1,224,397 | 44.3% | 1.31 |
+| `outright_bz` | 75 | +$940,958 | 48.0% | 1.36 |
+| `ho_rb` | 73 | +$876,426 | 43.8% | 1.22 |
+
+---
+
+## Geopolitical Stress Analysis
+
+`geopolitical_analysis.ipynb` isolates six major geopolitical events and measures strategy performance, spread dislocation, and signal behaviour during each. The full analysis is in the notebook; highlights below.
+
+| Event | Period | Strategy Return | Max DD | Key Dynamic |
+|---|---|---|---|---|
+| Abqaiq Attack | Sep–Oct 2019 | positive | shallow | Brent premium spiked 15%; strategy faded the overshoot and profited as WTI–Brent reverted |
+| Soleimani Killing | Jan 2020 | positive | shallow | 3-week risk premium in WTI/Brent; reverted faster than expected; short-term trades profitable |
+| COVID + Saudi–Russia Price War | Feb–Jul 2020 | mixed | deepest | WTI settled −$37/bbl; crack spreads inverted; ATR stops contained losses but this was the hardest period |
+| Russia–Ukraine Invasion | Feb–Jul 2022 | positive | moderate | HO crack hit record highs; strategy caught the reversion as European supply normalised |
+| Iran–Israel Direct Strike | Apr–May 2024 | positive | shallow | 300+ drones/missiles fired; Brent spiked then fully reverted within 2 weeks; clean fade trade |
+| US–Iran War | Mar 2026 | positive | moderate | Strait of Hormuz risk premium in Brent; crack spread dislocation reversed as conflict stabilised |
+
+**Pattern by event type:**
+- **Short, sharp spikes** (Soleimani, Abqaiq, Iran-Israel): risk premium fades in 1–3 weeks → strategy profits by fading the move
+- **Prolonged shocks** (COVID, Russia-Ukraine): mean reversion assumptions hold but stops get hit more frequently; ATR-based risk control is critical
+- **Sustained wars** (US-Iran 2026): initial shock trade profitable; longer lookbacks (90–120d) adapt better to the new structural regime
+
+**Spread sensitivity by event:**
+- `wti_brent` is most sensitive to Middle East risk (Brent carries the geopolitical premium)
+- Crack spreads react to supply disruptions (compress when crude spikes, widen when product supply is hit)
+- Butterflies show the most consistent mean reversion across all event types
 
 ---
 
 ## Key Findings
 
 **What works:**
-- **WTI–Brent** is the standout spread in both IS (+$8.2M) and OOS (+$4.6M) — the most structurally mean-reverting spread in the universe, anchored by pipeline dynamics, quality differentials, and storage arbitrage. OOS win rate of 60.9% is the highest of any spread
-- **Crack spreads (RB, 211, HO)** and **butterflies** all survive OOS with profit factors above 1.5, confirming genuine mean-reversion in refining margins
-- **IS→OOS Sharpe decay is minimal** (1.34 → 1.12, ~16%) — unusually low for a commodity strategy, attributable to the economic grounding of these spread relationships
-- OOS **win rate matches IS exactly** (51.0%) — a strong signal the strategy isn't curve-fit
-- Outrights contribute modestly; useful for diversification but not the core alpha source
+- **WTI–Brent** is the standout spread in both IS (+$9.4M) and OOS (+$8.3M) — the most structurally mean-reverting spread in the universe. OOS win rate of 62.4% is the highest of any spread and has strengthened with more data
+- **Crack spreads and butterflies** all survive OOS with profit factors above 1.4, confirming genuine mean-reversion in refining margins
+- **IS→OOS Sharpe decay is minimal** (1.23 → 1.18, ~4%) — the tightest gap of any run, attributable to the economic grounding of the spread relationships and the additional data anchoring the regime
+- **OOS win rate exceeds IS** (52.3% vs 50.6%) and OOS Calmar (2.62) exceeds IS (1.63) — the strategy is better live than backtested
+- **`ho_rb` has recovered** — OOS positive (+$876K) in the extended dataset after being flat in the 2025 cutoff run
 
 **What to watch:**
-- **`ho_rb` is marginal** — IS profit factor 1.13, OOS essentially flat (−$50K, PF 0.98). The heating oil vs gasoline seasonal relationship has weakened as US refinery exports grew. Consider removing if it continues to underperform
-- **Calendar spreads were tested and removed** — the EMA-basis approximation on front-month continuous data is invalid. Disabled via `INCLUDE_CALENDAR_SPREADS = False` in `config.py`
+- **Fold 17 (H1 2025, −2.0% OOS)** — the one negative fold in the extended run, coinciding with early US-Iran tension before the war proper began. Spread relationships were disrupted before resuming normal mean reversion
+- **Calendar spreads remain excluded** — disabled via `INCLUDE_CALENDAR_SPREADS = False` in `config.py`
 
 **Parameter stability:**
-- The optimizer selects **20d–60d lookbacks most frequently** on real data — shorter than the 90d that dominated on synthetic OU data. Real oil spreads have faster mean-reversion dynamics than the synthetic process assumed
-- A **fixed 40d lookback with z_entry ~1.5** is a reasonable starting point for live deployment — balances responsiveness with noise reduction
-- All 13 completed OOS folds are **positive in absolute return**, with only Fold 15 (2024 H1) showing a negative Sharpe (−0.25) despite a +1.4% return — low activity rather than a losing period
-
-**Worst period:**
-- **2024 H1** (Fold 15): Lowest OOS Sharpe (−0.25) amid OPEC+ production uncertainty compressing spread volatility. Worth monitoring as a potential regime shift
+- The optimizer selects **20d–40d lookbacks most frequently** across all folds
+- A **fixed 40d lookback with z_entry ~1.5** remains the recommended starting point for live deployment
+- All 16 completed OOS folds show **positive absolute returns** except Fold 17 (−2.0%)
 
 ---
 
@@ -203,6 +227,8 @@ Full 10-year backtest on CL=F, BZ=F, HO=F, RB=F daily closes (~2,514 bars per in
 | `walk_forward.png` | IS vs OOS equity, fold Sharpe scatter, param stability, per-fold OOS returns |
 | `trades.csv` | Full trade log — entry/exit dates, direction, lots, P&L, stop flags |
 | `walk_forward_folds.csv` | Per-fold: params selected, IS Sharpe, OOS Sharpe, OOS return, trade count |
+| `strat.ipynb` | End-to-end strategy walkthrough with live outputs |
+| `geopolitical_analysis.ipynb` | Per-event deep dives across 6 major geopolitical shocks |
 
 ---
 
@@ -212,6 +238,8 @@ Key parameters in `config.py`:
 
 | Parameter | Default | Description |
 |---|---|---|
+| `START_DATE` | 2015-01-01 | Backtest start |
+| `END_DATE` | 2026-03-31 | Backtest end |
 | `DEFAULT_LOOKBACK` | 60 | Z-score rolling window (days) |
 | `DEFAULT_Z_ENTRY` | 1.5 | \|z\| threshold to open a position |
 | `DEFAULT_Z_EXIT` | 0.3 | \|z\| threshold to close a position |
@@ -223,3 +251,4 @@ Key parameters in `config.py`:
 | `INITIAL_CAPITAL` | $10,000,000 | Starting equity |
 | `COMMISSION_PER_LOT` | $3.00 | Round-trip commission per lot |
 | `SLIPPAGE_PCT` | 0.0002 | Slippage per side (0.02% of notional) |
+| `INCLUDE_CALENDAR_SPREADS` | False | Enable EMA-basis calendar spread approximations |

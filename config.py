@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 # ── Data ──────────────────────────────────────────────────────────────────────
 START_DATE = "2015-01-01"
-END_DATE   = "2025-01-01"
+END_DATE   = "2026-03-31"
 
 # yfinance front-month continuous tickers
 TICKERS = {
