@@ -252,3 +252,12 @@ Key parameters in `config.py`:
 | `COMMISSION_PER_LOT` | $3.00 | Round-trip commission per lot |
 | `SLIPPAGE_PCT` | 0.0002 | Slippage per side (0.02% of notional) |
 | `INCLUDE_CALENDAR_SPREADS` | False | Enable EMA-basis calendar spread approximations |
+
+---
+
+## Author
+
+**Aman Syed** — [LinkedIn](https://linkedin.com/in/yourprofile) · [GitHub](https://github.com/yourusername)
+
+Quantitative finance professional with experience in systematic trading (energy futures, stat-arb), index research (MSCI), and counterparty credit risk. This project is part of a broader series on applied quantitative finance.
+
